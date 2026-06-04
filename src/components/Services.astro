@@ -1,0 +1,27 @@
+---
+// Services.astro — what-we-do section. Pure presentation; content comes from client.ts.
+import { client } from '../data/client';
+const s = client.services;
+---
+<section id="services" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+  <div class="max-w-2xl mb-14">
+    <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{s.eyebrow}</p>
+    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">
+      {s.headline}
+    </h2>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    {s.items.map((item) => (
+      <article class="group">
+        <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-5">
+          <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic transition-transform duration-500 group-hover:scale-105">
+            project photo
+          </div>
+        </div>
+        <h3 class="text-xl font-display font-extrabold mb-2 group-hover:underline underline-offset-4 decoration-1 transition">{item.title}</h3>
+        <p class="text-ink-soft leading-relaxed">{item.desc}</p>
+      </article>
+    ))}
+  </div>
+</section>

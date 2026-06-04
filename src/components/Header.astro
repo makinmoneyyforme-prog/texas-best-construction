@@ -1,0 +1,18 @@
+---
+// Header.astro — site nav. Pure presentation; content comes from client.ts.
+import { client } from '../data/client';
+---
+<header class="sticky top-0 z-50 bg-dark/95 backdrop-blur border-b border-white/10">
+  <nav class="px-8 md:px-12 h-20 flex items-center justify-between">
+    <a href="/" class="font-display font-extrabold text-xl tracking-tight text-white uppercase">{client.name}<span class="text-white">.</span></a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+      {client.nav.map((l) => (
+        <a href={l.href} class="hover:text-white transition">{l.label}</a>
+      ))}
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="tel:" class="hidden sm:block font-display font-bold text-sm text-white">{client.phone}</a>
+      <a href="#contact" class="font-display font-bold text-sm bg-white hover:bg-stone text-ink px-4 py-2.5 rounded-sm transition">{client.headerCta}</a>
+    </div>
+  </nav>
+</header>

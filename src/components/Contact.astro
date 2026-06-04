@@ -1,0 +1,63 @@
+---
+// Contact.astro — split layout: styled form + contact details. Pure presentation; content comes from client.ts.
+// Plain HTML form — wire up Web3Forms or FormSubmit (set action + access key) later.
+import { client } from '../data/client';
+const c = client.contact;
+const details = [
+  { label: "Call us", value: client.phone, href: "tel:" },
+  { label: "Email", value: client.email, href: "mailto:" },
+  { label: "Service area", value: c.serviceArea },
+  { label: "Hours", value: c.hours },
+];
+const inputClass = "w-full bg-bone border border-ink/15 rounded-sm px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition";
+---
+<section id="contact" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+  <div class="max-w-2xl mb-14">
+    <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{c.eyebrow}</p>
+    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
+  </div>
+
+  <div class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start">
+    <!-- Set action to your Web3Forms/FormSubmit endpoint and add the access-key hidden input later. -->
+    <form action="" method="POST" class="lg:col-span-3 grid sm:grid-cols-2 gap-5">
+      <div class="sm:col-span-1">
+        <label for="name" class="block font-display font-bold text-sm mb-2">Name</label>
+        <input id="name" name="name" type="text" required placeholder="Your name" class={inputClass} />
+      </div>
+      <div class="sm:col-span-1">
+        <label for="phone" class="block font-display font-bold text-sm mb-2">Phone</label>
+        <input id="phone" name="phone" type="tel" placeholder="(469) 555-0000" class={inputClass} />
+      </div>
+      <div class="sm:col-span-2">
+        <label for="email" class="block font-display font-bold text-sm mb-2">Email</label>
+        <input id="email" name="email" type="email" required placeholder="you@email.com" class={inputClass} />
+      </div>
+      <div class="sm:col-span-2">
+        <label for="project" class="block font-display font-bold text-sm mb-2">Project type</label>
+        <select id="project" name="project" class={inputClass}>
+          {c.projectTypes.map((t) => <option value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div class="sm:col-span-2">
+        <label for="message" class="block font-display font-bold text-sm mb-2">Project details</label>
+        <textarea id="message" name="message" rows="5" placeholder="Tell us what you're planning, your timeline, and your location." class={inputClass}></textarea>
+      </div>
+      <div class="sm:col-span-2">
+        <button type="submit" class="font-display font-bold text-sm bg-ink hover:bg-accent-deep text-white px-6 py-3.5 rounded-sm transition">{c.submitCta}</button>
+      </div>
+    </form>
+
+    <div class="lg:col-span-2 lg:pl-4">
+      <div class="bg-white rounded-sm border border-ink/10 divide-y divide-ink/10">
+        {details.map((d) => (
+          <div class="p-6">
+            <div class="font-display font-bold text-sm uppercase tracking-wide text-ink mb-1.5">{d.label}</div>
+            {d.href
+              ? <a href={d.href} class="text-xl font-display font-extrabold hover:underline underline-offset-2 transition">{d.value}</a>
+              : <div class="text-ink/90 leading-relaxed">{d.value}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

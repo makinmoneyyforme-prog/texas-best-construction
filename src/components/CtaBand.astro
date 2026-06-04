@@ -1,0 +1,18 @@
+---
+// CtaBand.astro — full-bleed conversion band, solid near-black. Pure presentation; content comes from client.ts.
+import { client } from '../data/client';
+const c = client.cta;
+---
+<section class="bg-dark text-white px-8 md:px-12 py-20 md:py-24">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+    <div class="max-w-2xl">
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-white mb-4"><span class="w-8 h-px bg-white"></span>{c.eyebrow}</p>
+      <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
+      <p class="text-white/80 text-lg mt-4 max-w-[44ch] leading-snug">{c.supporting}</p>
+    </div>
+    <div class="flex flex-wrap gap-3 shrink-0">
+      <a href="#contact" class="font-display font-bold text-sm bg-white hover:bg-stone text-ink px-6 py-3.5 rounded-sm transition">{c.primaryCta}</a>
+      <a href="tel:" class="font-display font-bold text-sm border border-white/30 hover:bg-white/10 text-white px-6 py-3.5 rounded-sm transition">Call {client.phone}</a>
+    </div>
+  </div>
+</section>

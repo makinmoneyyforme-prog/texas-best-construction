@@ -10,43 +10,43 @@ const contact = [
 <footer class="bg-dark text-white px-8 md:px-12 pt-20 pb-10">
   <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
     <div class="lg:pr-8">
-      <a href="/" class="font-display font-extrabold text-2xl tracking-tight text-white uppercase">{client.name}<span class="text-accent">.</span></a>
-      <p class="text-white/55 leading-relaxed mt-4 max-w-[32ch]">{f.tagline}</p>
+      <a href="/" class="font-display font-extrabold text-2xl tracking-tight text-white uppercase">{client.name}<span class="text-white">.</span></a>
+      <p class="text-white/70 leading-relaxed mt-4 max-w-[32ch]">{f.tagline}</p>
     </div>
 
     <div>
-      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-accent mb-5">Quick links</h3>
+      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-white mb-5">Quick links</h3>
       <ul class="space-y-3">
         {f.quickLinks.map((l) => (
-          <li><a href={l.href} class="text-white/65 hover:text-white transition">{l.label}</a></li>
+          <li><a href={l.href} class="text-white/70 hover:text-white transition">{l.label}</a></li>
         ))}
       </ul>
     </div>
 
     <div>
-      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-accent mb-5">Service area</h3>
+      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-white mb-5">Service area</h3>
       <ul class="space-y-3">
-        {f.towns.map((t) => <li class="text-white/65">{t}</li>)}
+        {f.towns.map((t) => <li class="text-white/70">{t}</li>)}
       </ul>
     </div>
 
     <div>
-      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-accent mb-5">Contact</h3>
+      <h3 class="font-display font-bold text-sm uppercase tracking-widest text-white mb-5">Contact</h3>
       <ul class="space-y-3">
         {contact.map((c) => (
-          <li><a href={c.href} class="text-white/65 hover:text-white transition">{c.label}</a></li>
+          <li><a href={c.href} class="text-white/70 hover:text-white transition">{c.label}</a></li>
         ))}
       </ul>
     </div>
   </div>
 
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-16 pt-8 border-t border-white/10">
-    <p class="text-white/45 text-sm">{f.licenseNumber ? `Licensed & Insured · License #${f.licenseNumber}` : "Insured"}</p>
+    <p class="text-white/60 text-sm">{f.licenseNumber ? `Licensed & Insured · License #${f.licenseNumber}` : "Insured"}</p>
     <div class="flex items-center gap-6 text-sm font-display font-bold uppercase tracking-wide">
       {f.socials.map((s) => (
-        <a href={s.href} class="text-white/55 hover:text-accent transition">{s.label}</a>
+        <a href={s.href} class="text-white/70 hover:text-white transition">{s.label}</a>
       ))}
     </div>
-    <p class="text-white/45 text-sm">© {f.copyrightYear} {client.legalName}. All rights reserved.</p>
+    <p class="text-white/60 text-sm">© {f.copyrightYear} {client.legalName}. All rights reserved.</p>
   </div>
 </footer>
