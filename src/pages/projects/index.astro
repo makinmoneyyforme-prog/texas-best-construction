@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { client } from '../../data/client';
+
+const projects = client.projects;
+const filters = ['All', 'Turnkey', 'Shell', 'Custom Home', 'Shop'] as const;
+---
+<BaseLayout title="Our Builds · Texas Best Construction">
+  <section class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+    <!-- Page header -->
+    <div class="max-w-3xl" data-reveal>
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Our work</p>
+      <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05]">Our Builds</h1>
+      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">Barndominiums, custom homes, and metal shops built across North &amp; Central Texas — shell to turn-key. Proof, not promises.</p>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between border-b border-ink/10 pb-6" data-reveal>
+      <div class="flex flex-wrap gap-2.5" role="group" aria-label="Filter builds by type">
+        {filters.map((f, i) => (
+          <button
+            type="button"
+            data-filter={f}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            class:list={[
+              'font-display font-bold text-sm px-4 py-2 rounded-sm border transition',
+              i === 0
+                ? 'bg-ink text-white border-ink'
+                : 'bg-transparent text-ink border-ink/15 hover:border-ink',
+            ]}
+          >{f}</button>
+        ))}
+      </div>
+      <p class="font-display font-bold text-sm text-ink-soft whitespace-nowrap" aria-live="polite">
+        <span id="result-count">{projects.length}</span> builds
+      </p>
+    </div>
+
+    <!-- Grid — each card links to its dedicated project page -->
+    <div id="project-grid" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal>
+      {projects.map((p) => (
+        <a
+          href={`/projects/${p.slug}`}
+          data-project-card
+          data-type={p.type}
+          class="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-4 focus-visible:ring-offset-bone rounded-sm"
+        >
+          <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-4 relative" data-reveal-img>
+            {p.image
+              ? <img src={p.image} alt={p.name} class="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
+              : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic transition-transform duration-500 group-hover:scale-105">project photo</div>}
+            <span class="absolute top-3 left-3 font-display font-bold text-[11px] uppercase tracking-wide bg-ink text-white px-2.5 py-1 rounded-sm">{p.type}</span>
+          </div>
+          <h3 class="text-xl font-display font-extrabold group-hover:underline underline-offset-4 decoration-1 transition">{p.name}</h3>
+          <p class="text-ink-soft mt-1 flex items-center gap-2 text-sm">
+            <span>{p.location}</span>
+            {p.sqft && <><span class="w-1 h-1 rounded-full bg-ink-soft/50"></span><span>{p.sqft.toLocaleString()} sq ft</span></>}
+          </p>
+        </a>
+      ))}
+    </div>
+
+    <!-- Empty state -->
+    <p id="empty-state" class="hidden mt-16 text-center text-ink-soft italic">No builds in this category yet — more coming soon.</p>
+  </section>
+</BaseLayout>
+
+<script>
+  // ── Filtering ────────────────────────────────────────────────────────
+  const filterBtns = document.querySelectorAll('[data-filter]');
+  const cards = Array.from(document.querySelectorAll('[data-project-card]'));
+  const countEl = document.getElementById('result-count');
+  const emptyEl = document.getElementById('empty-state');
+  const activeClasses = ['bg-ink', 'text-white', 'border-ink'];
+  const idleClasses = ['bg-transparent', 'text-ink', 'border-ink/15', 'hover:border-ink'];
+
+  function applyFilter(value) {
+    let shown = 0;
+    cards.forEach((card) => {
+      const match = value === 'All' || card.dataset.type === value;
+      card.classList.toggle('hidden', !match);
+      if (match) shown++;
+    });
+    if (countEl) countEl.textContent = String(shown);
+    if (emptyEl) emptyEl.classList.toggle('hidden', shown !== 0);
+  }
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach((b) => {
+        const on = b === btn;
+        b.setAttribute('aria-pressed', String(on));
+        b.classList.remove(...(on ? idleClasses : activeClasses));
+        b.classList.add(...(on ? activeClasses : idleClasses));
+      });
+      applyFilter(btn.dataset.filter);
+    });
+  });
+</script>

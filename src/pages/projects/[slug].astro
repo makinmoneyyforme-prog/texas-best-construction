@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { client } from '../../data/client';
+
+export function getStaticPaths() {
+  return client.projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+
+// Only the specs that actually exist render.
+const specs = [
+  project.sqft ? { label: 'Size', value: `${project.sqft.toLocaleString()} sq ft` } : null,
+  project.beds ? { label: 'Beds', value: String(project.beds) } : null,
+  project.baths ? { label: 'Baths', value: String(project.baths) } : null,
+  project.year ? { label: 'Year', value: String(project.year) } : null,
+].filter(Boolean) as { label: string; value: string }[];
+
+// A few other builds for the bottom strip (in order, excluding this one).
+const moreBuilds = client.projects.filter((p) => p.slug !== project.slug).slice(0, 3);
+
+// Accepts watch?v= / youtu.be / embed URLs and returns an embeddable one.
+function embedUrl(url: string) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : url;
+}
+---
+<BaseLayout title={`${project.name} · Texas Best Construction`}>
+  <article class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div data-reveal>
+        <a href="/projects" class="inline-flex items-center gap-1.5 font-display font-bold text-sm text-ink-soft hover:text-ink transition"><span aria-hidden="true">←</span> Back to all builds</a>
+
+        <span class="block w-max font-display font-bold text-[11px] uppercase tracking-widest text-white bg-ink px-2.5 py-1 rounded-sm mt-10">{project.type}</span>
+        <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05] mt-4">{project.name}</h1>
+        <p class="text-lg md:text-xl text-ink-soft mt-3">{project.location}</p>
+
+        {specs.length > 0 && (
+          <dl class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-px bg-ink/10 rounded-sm overflow-hidden border border-ink/10 max-w-2xl">
+            {specs.map((s) => (
+              <div class="bg-bone p-4">
+                <dt class="font-display font-bold text-xs uppercase tracking-wide text-ink-soft">{s.label}</dt>
+                <dd class="font-display font-extrabold text-lg mt-1">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+
+      <!-- Hero photo -->
+      <div class="aspect-[16/9] bg-stone rounded-sm overflow-hidden mt-12" data-reveal>
+        {project.image
+          ? <img src={project.image} alt={project.name} class="w-full h-full object-cover grayscale" />
+          : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic">project photo</div>}
+      </div>
+
+      <!-- Additional gallery photos -->
+      {project.gallery && project.gallery.length > 0 && (
+        <div class="grid sm:grid-cols-2 gap-4 mt-4" data-reveal-group>
+          {project.gallery.map((src) => (
+            <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden" data-reveal-img>
+              {src
+                ? <img src={src} alt={project.name} class="w-full h-full object-cover grayscale" />
+                : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic">project photo</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <!-- Description -->
+      {project.blurb && (
+        <p class="text-lg leading-relaxed text-ink-soft mt-12 max-w-2xl" data-reveal>{project.blurb}</p>
+      )}
+
+      <!-- Video tour -->
+      {project.youtube && (
+        <div class="mt-12" data-reveal>
+          <p class="font-display font-bold text-sm uppercase tracking-widest text-ink mb-4 flex items-center gap-3"><span class="w-8 h-px bg-ink"></span>Video tour</p>
+          <div class="aspect-video rounded-sm overflow-hidden bg-dark">
+            <iframe
+              class="w-full h-full"
+              src={embedUrl(project.youtube)}
+              title={`${project.name} — video tour`}
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      )}
+
+      <!-- CTA -->
+      <div class="mt-16 bg-dark text-white rounded-sm p-8 md:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6" data-reveal>
+        <div>
+          <h2 class="text-2xl md:text-3xl font-display font-extrabold tracking-tight leading-tight">Want something like this?</h2>
+          <p class="text-white/70 mt-2 leading-relaxed">Free, no-pressure quotes across North &amp; Central Texas — shell to turn-key.</p>
+        </div>
+        <a href="/quote" class="shrink-0 inline-flex items-center gap-1.5 font-display font-bold text-sm bg-white hover:bg-stone text-ink px-6 py-3.5 rounded-sm transition">
+          Get a quote
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <!-- More builds -->
+      {moreBuilds.length > 0 && (
+        <div class="mt-20 pt-12 border-t border-ink/10" data-reveal>
+          <h2 class="font-display font-extrabold text-2xl tracking-tight mb-8">More builds</h2>
+          <div class="grid sm:grid-cols-3 gap-8" data-reveal-group>
+            {moreBuilds.map((p) => (
+              <a href={`/projects/${p.slug}`} class="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-4 focus-visible:ring-offset-bone rounded-sm">
+                <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-4 relative">
+                  {p.image
+                    ? <img src={p.image} alt={p.name} class="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
+                    : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic transition-transform duration-500 group-hover:scale-105">project photo</div>}
+                  <span class="absolute top-3 left-3 font-display font-bold text-[11px] uppercase tracking-wide bg-ink text-white px-2.5 py-1 rounded-sm">{p.type}</span>
+                </div>
+                <h3 class="font-display font-extrabold group-hover:underline underline-offset-4 decoration-1 transition">{p.name}</h3>
+                <p class="text-ink-soft text-sm mt-1">{p.location}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Back link -->
+      <div class="mt-16 pt-8 border-t border-ink/10" data-reveal>
+        <a href="/projects" class="inline-flex items-center gap-1.5 font-display font-bold text-sm text-ink hover:gap-2.5 transition-all"><span aria-hidden="true">←</span> Back to all builds</a>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
