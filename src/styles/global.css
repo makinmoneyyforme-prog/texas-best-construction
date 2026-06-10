@@ -19,8 +19,54 @@
 }
 
 @layer base {
-  h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+  /* Editorial display type: tighter tracking + leading for a high-end feel. */
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.02; letter-spacing: -0.025em; text-wrap: balance; }
+  h1 { letter-spacing: -0.035em; }
   body { line-height: 1.6; }
+}
+
+/* ── Film-grain overlay ────────────────────────────────────────────────
+   Fixed, grayscale fractal-noise texture so pure B&W reads filmic, not flat.
+   Static (no animation), pointer-events:none, one composited layer → no scroll
+   repaints. Sits above page content, below header (50) / menus (60) / modals (80). */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* ── Micro-interactions ────────────────────────────────────────────────
+   Animated underline for text links (nav/footer) — opt in via .link-underline. */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+}
+.link-underline:hover { background-size: 100% 1px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .link-underline { transition: background-size 0.3s ease; }
+  /* Subtle premium lift on every pill button/CTA — they all share
+     rounded-sm + transition, so this stays consistent without per-component edits. */
+  a.rounded-sm.transition:hover,
+  button.rounded-sm.transition:hover { transform: translateY(-1px); }
+  a.rounded-sm.transition:active,
+  button.rounded-sm.transition:active { transform: translateY(0); }
+}
+
+/* Image/card "wipe" reveal initial state — gated on html.motion so no-JS and
+   reduced-motion users always see images fully. GSAP opens the clip-path. */
+html.motion [data-reveal-img] {
+  clip-path: inset(0 0 100% 0 round 0.125rem);
+  will-change: clip-path;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-img] { clip-path: none !important; }
 }
 
 /* ── Motion layer ──────────────────────────────────────────────────────

@@ -7,11 +7,11 @@ const featured = g.featured;
 <section id="projects" class="bg-dark text-white px-8 md:px-12 py-24 md:py-28">
   <div class="max-w-2xl mb-14" data-reveal>
     <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-white mb-4"><span class="w-8 h-px bg-white"></span>{g.eyebrow}</p>
-    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{g.headline}</h2>
+    <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight leading-tight">{g.headline}</h2>
   </div>
 
   <article class="group relative overflow-hidden rounded-sm mb-4 cursor-pointer" data-reveal>
-    <div class="aspect-[21/9] bg-dark-2 ring-1 ring-inset ring-white/10 flex items-center justify-center text-white/30 text-sm italic transition-transform duration-700 group-hover:scale-105">project photo</div>
+    <div class="aspect-[21/9] bg-dark-2 ring-1 ring-inset ring-white/10 flex items-center justify-center text-white/30 text-sm italic transition-transform duration-700 group-hover:scale-105" data-reveal-img>project photo</div>
     <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 55%);"></div>
     <div class="absolute bottom-0 left-0 p-6 md:p-8">
       <h3 class="font-display font-extrabold text-2xl md:text-3xl">{featured.title}</h3>
@@ -22,7 +22,7 @@ const featured = g.featured;
   <div class="grid md:grid-cols-3 gap-4" data-reveal-group>
     {g.items.map((p) => (
       <article class="group relative overflow-hidden rounded-sm cursor-pointer">
-        <div class="aspect-[4/3] bg-dark-2 ring-1 ring-inset ring-white/10 flex items-center justify-center text-white/30 text-sm italic transition-transform duration-700 group-hover:scale-105">project photo</div>
+        <div class="aspect-[4/3] bg-dark-2 ring-1 ring-inset ring-white/10 flex items-center justify-center text-white/30 text-sm italic transition-transform duration-700 group-hover:scale-105" data-reveal-img>project photo</div>
         <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0) 60%);"></div>
         <div class="absolute bottom-0 left-0 p-5">
           <h3 class="font-display font-extrabold text-lg">{p.title}</h3>
@@ -30,5 +30,12 @@ const featured = g.featured;
         </div>
       </article>
     ))}
+  </div>
+
+  <div class="mt-10" data-reveal>
+    <a href="/projects" class="inline-flex items-center gap-1.5 font-display font-bold text-sm border border-white/30 hover:bg-white/10 text-white px-5 py-3 rounded-sm transition">
+      See all builds
+      <span aria-hidden="true">→</span>
+    </a>
   </div>
 </section>

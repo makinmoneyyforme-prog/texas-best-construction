@@ -19,14 +19,16 @@ const isActive = (href: string) =>
       {n.primary.map((l) => (
         <a
           href={l.href}
+          target={l.external ? '_blank' : undefined}
+          rel={l.external ? 'noopener noreferrer' : undefined}
           aria-current={isActive(l.href) ? 'page' : undefined}
           class:list={[
-            'relative transition hover:text-white',
+            'relative inline-flex items-center gap-1 transition hover:text-white',
             isActive(l.href)
               ? 'text-white after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:bg-white'
-              : '',
+              : 'link-underline',
           ]}
-        >{l.label}</a>
+        >{l.label}{l.external && <span class="text-white/40 text-xs" aria-hidden="true">↗</span>}</a>
       ))}
 
       <!-- Resources dropdown (opens on hover + keyboard focus) -->
@@ -98,12 +100,14 @@ const isActive = (href: string) =>
             <a
               href={l.href}
               data-nav-link
+              target={l.external ? '_blank' : undefined}
+              rel={l.external ? 'noopener noreferrer' : undefined}
               aria-current={isActive(l.href) ? 'page' : undefined}
               class:list={[
-                'font-display font-bold text-2xl py-2.5 transition',
+                'flex items-center gap-2 font-display font-bold text-2xl py-2.5 transition',
                 isActive(l.href) ? 'text-white' : 'text-white/70 hover:text-white',
               ]}
-            >{l.label}</a>
+            >{l.label}{l.external && <span class="text-white/40 text-base" aria-hidden="true">↗</span>}</a>
           ))}
         </nav>
 

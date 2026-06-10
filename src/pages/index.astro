@@ -1,21 +1,27 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import ServiceAreaBand from '../components/ServiceAreaBand.astro';
 import Services from '../components/Services.astro';
 import Gallery from '../components/Gallery.astro';
-import BarndoViewer from '../components/BarndoViewer.astro';
-import Reviews from '../components/Reviews.astro';
 import About from '../components/About.astro';
+import Reviews from '../components/Reviews.astro';
+import ProcessTeaser from '../components/ProcessTeaser.astro';
+import CostCalculator from '../components/CostCalculator.astro';
+import BarndoViewer from '../components/BarndoViewer.astro';
 import CtaBand from '../components/CtaBand.astro';
-import Contact from '../components/Contact.astro';
 ---
 <BaseLayout title="Contractor Kit">
+  {/* The homepage is one guided funnel: what + where → proof → trust →
+      how it works → estimate → see it in 3D → convert. */}
   <Hero />
+  <ServiceAreaBand />
   <Services />
   <Gallery />
-  <BarndoViewer />
-  <Reviews />
   <About />
+  <Reviews />
+  <ProcessTeaser />
+  <CostCalculator />
+  <BarndoViewer />
   <CtaBand />
-  <Contact />
 </BaseLayout>

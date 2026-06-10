@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import CostCalculator from '../components/CostCalculator.astro';
 import { client } from '../data/client';
 
 const c = client.contact;
@@ -19,18 +18,15 @@ const details = [
     <div class="max-w-3xl" data-reveal>
       <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Free, no-pressure</p>
       <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05]">Get a Quote</h1>
-      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">Get a ballpark estimate in seconds with the calculator below, then send it over for an exact, no-pressure quote across North &amp; Central Texas.</p>
+      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">Tell us about your project and we'll get you an exact, no-pressure quote across North &amp; Central Texas — usually within one business day.</p>
     </div>
   </section>
 
-  <!-- Part 1: cost calculator -->
-  <CostCalculator />
-
-  <!-- Part 2: quote request form -->
-  <section id="quote-form" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28 scroll-mt-24">
+  <!-- Quote request form -->
+  <section id="quote-form" class="bg-bone text-ink px-8 md:px-12 pb-24 md:pb-28 pt-4 scroll-mt-24">
     <div class="max-w-2xl mb-14" data-reveal>
       <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{c.eyebrow}</p>
-      <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
+      <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
     </div>
 
     <div class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start">
@@ -113,6 +109,32 @@ const details = [
 </BaseLayout>
 
 <script define:vars={{ phone: client.phone, email: client.email }}>
+  // Hydrate the estimate passed from the homepage calculator (?estimate=&type=).
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const estimate = params.get('estimate');
+    const type = params.get('type');
+    if (estimate) {
+      const field = document.getElementById('estimate-field');
+      const summaryEl = document.getElementById('estimate-summary');
+      const wrap = document.getElementById('estimate-summary-wrap');
+      if (field) field.value = estimate;
+      if (summaryEl) summaryEl.textContent = estimate;
+      if (wrap) wrap.classList.remove('hidden');
+    }
+    if (type) {
+      const select = document.getElementById('q-project');
+      if (select) {
+        const match = Array.from(select.options).find((o) => o.value === type);
+        if (match) select.value = match.value;
+      }
+    }
+    // Tidy the URL so a refresh/share doesn't keep the estimate query string.
+    if ((estimate || type) && window.history.replaceState) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  })();
+
   const form = document.getElementById('quote-request-form');
   if (form) {
     const submitBtn = document.getElementById('quote-submit');

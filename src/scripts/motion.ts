@@ -74,6 +74,57 @@ if (!prefersReducedMotion) {
       });
     }
 
+    // ── Count-up stat numbers ──────────────────────────────────────────
+    // Animates real numbers (from client.ts) up when scrolled in. Non-numeric
+    // values (e.g. "Family") are left untouched. Reduced motion skips this
+    // whole module, so those users see the final numbers immediately.
+    document.querySelectorAll('[data-countup]').forEach((el) => {
+      const raw = (el.textContent || '').trim();
+      const match = raw.match(/^(\D*)(\d[\d,]*)(.*)$/);
+      if (!match) return;
+      const prefix = match[1];
+      const hasComma = match[2].includes(',');
+      const suffix = match[3];
+      const target = parseInt(match[2].replace(/,/g, ''), 10);
+      const render = (n: number) =>
+        prefix + (hasComma ? n.toLocaleString('en-US') : String(n)) + suffix;
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => {
+          const obj = { v: 0 };
+          gsap.to(obj, {
+            v: target,
+            duration: 1.2,
+            ease: 'power2.out',
+            onUpdate: () => { el.textContent = render(Math.round(obj.v)); },
+          });
+        },
+      });
+    });
+
+    // ── Image/card "wipe" reveal ───────────────────────────────────────
+    // A tasteful clip-path wipe for image slots, layered on the fade reveal.
+    document.querySelectorAll('[data-reveal-img]').forEach((el) => {
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 88%',
+        once: true,
+        onEnter: () =>
+          gsap.fromTo(
+            el,
+            { clipPath: 'inset(0 0 100% 0 round 0.125rem)' },
+            {
+              clipPath: 'inset(0 0 0% 0 round 0.125rem)',
+              duration: 0.8,
+              ease: 'power3.out',
+              onComplete: () => gsap.set(el, { clearProps: 'will-change' }),
+            }
+          ),
+      });
+    });
+
     // Recompute trigger positions once fonts/images have settled.
     window.addEventListener('load', () => ScrollTrigger.refresh());
   } catch (err) {

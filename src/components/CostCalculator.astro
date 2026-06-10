@@ -1,15 +1,16 @@
 ---
-// CostCalculator.astro — live B&W barndominium cost estimator for /quote.
+// CostCalculator.astro — live B&W barndominium cost estimator (homepage funnel).
 // All rates come from client.calculator; no numbers are hardcoded here. The CTA
-// scrolls to #quote-form on the same page and passes the estimate into the form.
+// carries the current estimate to the /quote form via query params (or fills an
+// in-page #quote-form if one exists — a fallback for same-page usage).
 import { client } from '../data/client';
 const calc = client.calculator;
 const segBtn = 'flex-1 font-display font-bold text-sm px-4 py-2.5 rounded-sm transition text-center';
 ---
-<section class="bg-dark text-white px-8 md:px-12 py-24 md:py-28">
+<section id="calculator" class="bg-dark text-white px-8 md:px-12 py-24 md:py-28 scroll-mt-24">
   <div class="max-w-2xl mb-14" data-reveal>
     <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-white mb-4"><span class="w-8 h-px bg-white"></span>{calc.eyebrow}</p>
-    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{calc.headline}</h2>
+    <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight leading-tight">{calc.headline}</h2>
   </div>
 
   <div id="calc" class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start" data-config={JSON.stringify(calc)} data-reveal-group>
@@ -76,7 +77,7 @@ const segBtn = 'flex-1 font-display font-bold text-sm px-4 py-2.5 rounded-sm tra
         <p id="calc-persqft" class="text-white/50 text-sm mt-2">—</p>
         <a
           id="calc-cta"
-          href="#quote-form"
+          href="/quote"
           class="mt-7 block w-full font-display font-bold text-sm bg-white hover:bg-stone text-ink px-5 py-3.5 rounded-sm transition text-center"
         >{calc.cta}</a>
         <p class="text-white/40 text-xs leading-relaxed mt-5">{calc.disclaimer}</p>
@@ -193,33 +194,39 @@ const segBtn = 'flex-1 font-display font-bold text-sm px-4 py-2.5 rounded-sm tra
       render();
     });
 
-    // CTA: pass the estimate into the quote form, then smooth-scroll to it.
+    // CTA: carry the current estimate to the quote form. The form lives on
+    // /quote now, so we pass it via query params; if a #quote-form happens to be
+    // on the same page (legacy/fallback), fill it inline and scroll instead.
     cta.addEventListener('click', (ev) => {
-      const target = document.getElementById('quote-form');
       const e = estimate();
-      const bits = [buildType().label, `${sqft.toLocaleString('en-US')} sq ft`];
+      const typeLabel = buildType().label;
+      const bits = [typeLabel, `${sqft.toLocaleString('en-US')} sq ft`];
       if (buildType().finish) bits.push(finishLevel().label);
       bits.push(`~${fmt(e.low)}–${fmt(e.high)}`);
       const summary = bits.join(' · ');
 
-      const field = document.getElementById('estimate-field');
-      const summaryEl = document.getElementById('estimate-summary');
-      const wrap = document.getElementById('estimate-summary-wrap');
-      if (field) field.value = summary;
-      if (summaryEl) summaryEl.textContent = summary;
-      if (wrap) wrap.classList.remove('hidden');
-
-      // Pre-select the matching project type when present.
-      const select = document.getElementById('q-project');
-      if (select) {
-        const match = Array.from(select.options).find((o) => o.value === buildType().label);
-        if (match) select.value = match.value;
-      }
-
-      if (target) {
+      const inPageForm = document.getElementById('quote-form');
+      if (inPageForm) {
+        // Same-page form: fill the hidden field + summary and smooth-scroll.
+        const field = document.getElementById('estimate-field');
+        const summaryEl = document.getElementById('estimate-summary');
+        const wrap = document.getElementById('estimate-summary-wrap');
+        if (field) field.value = summary;
+        if (summaryEl) summaryEl.textContent = summary;
+        if (wrap) wrap.classList.remove('hidden');
+        const select = document.getElementById('q-project');
+        if (select) {
+          const match = Array.from(select.options).find((o) => o.value === typeLabel);
+          if (match) select.value = match.value;
+        }
         ev.preventDefault();
-        if (window.lenis) window.lenis.scrollTo(target, { offset: -80 });
-        else target.scrollIntoView({ behavior: 'smooth' });
+        if (window.lenis) window.lenis.scrollTo(inPageForm, { offset: -80 });
+        else inPageForm.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Calculator and form are on different pages: carry the estimate over.
+        ev.preventDefault();
+        const qs = new URLSearchParams({ estimate: summary, type: typeLabel });
+        window.location.href = `/quote?${qs.toString()}`;
       }
     });
 

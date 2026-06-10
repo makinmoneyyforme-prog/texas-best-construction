@@ -6,11 +6,11 @@ const h = client.hero;
 <section class="grid md:grid-cols-2 min-h-[34rem]">
   <div class="bg-dark text-white flex flex-col justify-center px-8 py-16 md:px-12" data-reveal-group>
     <p class="flex items-center gap-3 font-display text-white font-bold text-xs tracking-[0.18em] uppercase"><span class="w-8 h-px bg-white"></span>{h.eyebrow}</p>
-    <h1 class="font-display text-white text-4xl md:text-5xl lg:text-6xl mt-4 max-w-[14ch]">{h.headlineLead} <span>{h.headlineAccent}</span> {h.headlineTrail}</h1>
+    <h1 class="font-display text-white text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[0.95] mt-5 max-w-[15ch]">{h.headlineLead} <span>{h.headlineAccent}</span> {h.headlineTrail}</h1>
     <p class="text-white/80 text-lg mt-4 max-w-[42ch] leading-snug">{h.subhead}</p>
     <div class="flex flex-wrap gap-3 mt-8">
       <a href="/quote" class="font-display font-bold text-sm bg-white hover:bg-stone text-ink px-5 py-3 rounded-sm transition">{h.primaryCta}</a>
-      <a href="tel:" class="font-display font-bold text-sm border border-white/30 hover:bg-white/10 text-white px-5 py-3 rounded-sm transition">Call {client.phone}</a>
+      <a href="/projects" class="font-display font-bold text-sm border border-white/30 hover:bg-white/10 text-white px-5 py-3 rounded-sm transition">See our builds</a>
     </div>
     <div class="flex flex-wrap gap-6 mt-10 pt-5 border-t border-white/15 text-xs uppercase tracking-wide text-white/70">
       {h.trust.map((t) => (

@@ -22,6 +22,8 @@ const { title = "Contractor Site Kit" } = Astro.props;
     </script>
   </head>
   <body class="bg-bone text-ink font-body antialiased">
+    <!-- Filmic grain — barely-there, static, pointer-events:none (see global.css). -->
+    <div class="film-grain" aria-hidden="true"></div>
     <Header />
     <slot />
     <Footer />

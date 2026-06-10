@@ -120,6 +120,14 @@ export interface GetStarted {
   buildOptions: BuildOption[];
 }
 
+/** Compact service-area callout — lets visitors self-qualify instantly.
+ *  Single source for the slim band shown under the hero and on /quote. */
+export interface ServiceArea {
+  turnkey: string; // turnkey radius line
+  shell: string; //   shell radius line
+  area: string; //    region served
+}
+
 /** One selectable build type in the cost calculator. `finish: true` means the
  *  finish-level multipliers apply (Turnkey only). */
 export interface CalcBuildType {
@@ -169,7 +177,7 @@ export interface Client {
     headlineAccent: string;
     headlineTrail: string;
     subhead: string;
-    primaryCta: string; // label for the button that links to #contact
+    primaryCta: string; // label for the button that links to /quote
     trust: TrustItem[];
     image?: string; //    hero photo
   };
@@ -214,7 +222,7 @@ export interface Client {
     eyebrow: string;
     headline: string;
     supporting: string;
-    primaryCta: string; // label for the button that links to #contact
+    primaryCta: string; // label for the button that links to /quote
   };
 
   // ── Contact ──────────────────────────────────────────────────────────
@@ -238,10 +246,14 @@ export interface Client {
   // ── Get Started (/get-started) ───────────────────────────────────────
   getStarted: GetStarted;
 
+  // ── Service-area callout (homepage band + /quote) ────────────────────
+  serviceArea: ServiceArea;
+
   // ── Footer ───────────────────────────────────────────────────────────
   footer: {
     tagline: string;
     quickLinks: NavLink[];
+    clientLinks: NavItem[]; //  "For clients" group (portal, gear) — external open in new tab
     towns: string[]; //         service-area towns column
     licenseNumber?: string; //  rendered as "License #<value>" — omit when N/A (e.g. Texas doesn't license home builders)
     socials: Social[];
@@ -261,17 +273,17 @@ export const client: Client = {
     primary: [
       { label: "Home", href: "/" },
       { label: "Project Gallery", href: "/projects" },
-      { label: "Get Started", href: "/get-started" },
+      { label: "Barndo Plans", href: "https://bestbarndoplans.com/collections/barndo-plans", external: true },
       { label: "FAQ", href: "/faq" },
     ],
-    resourcesLabel: "Resources",
+    resourcesLabel: "More",
+    // Secondary items — kept out of prime nav. The homepage is now the guided
+    // funnel, so Get Started lives here. Client Portal + Barndo Gear are in the
+    // footer "For clients" group (footer.clientLinks below).
     resources: [
-      { label: "Barndo Plans", href: "https://bestbarndoplans.com/collections/barndo-plans", external: true },
-      { label: "Barndo Gear", href: "https://bestbarndoplans.com/collections/barndo-gear", external: true },
-      { label: "YouTube", href: "https://www.youtube.com/@TexasBestBarndominium", external: true },
-      // PLACEHOLDER — confirm the exact Client Portal URL (Buildertrend login for this account).
-      { label: "Client Portal", href: "https://buildertrend.net/", external: true },
       { label: "Barndo Buzz", href: "/buzz" },
+      { label: "YouTube", href: "https://www.youtube.com/@TexasBestBarndominium", external: true },
+      { label: "Get Started", href: "/get-started" },
     ],
     cta: { label: "Get a Quote", href: "/quote" },
     phone: { label: "(469) 552-8205", href: "tel:4695528205" },
@@ -279,42 +291,52 @@ export const client: Client = {
 
   // ── Hero ─────────────────────────────────────────────────────────────
   hero: {
-    eyebrow: "Shell & Turn-Key Barndominiums · North Texas",
-    // "Your barndominium, built right." — accent word is "right". The period
-    // lives in the accent field so it sits flush against the word.
-    headlineLead: "Your barndominium, built",
-    headlineAccent: "right.",
+    eyebrow: "Steel Barndominiums & Custom Homes · DFW & North Texas",
+    // Accent phrase carries the "Built Better by Design" energy; the period
+    // lives in the accent field so it sits flush against the phrase.
+    headlineLead: "Steel barndominiums,",
+    headlineAccent: "built better by design.",
     headlineTrail: "",
     subhead:
-      "Family-owned by Josh & Brandy Helm — building custom barndominiums, homes, and metal shops across North & Central Texas since 2006.",
-    primaryCta: "Get a Free Quote",
+      "Family-owned by Josh & Brandy Helm, building across the DFW area since 2006. We pair steel strength with proven wood framing — for homes that are tougher, run more efficient, and are built around your land, your life, and your vision.",
+    primaryCta: "Get a Quote",
     trust: [
-      { strong: "Family-Owned", rest: "" },
-      { strong: "20+", rest: "Yrs Experience" },
-      { strong: "DFW", rest: "& North Texas" },
+      { strong: "Family-owned", rest: "& operated" },
+      { strong: "Since 2006", rest: "in DFW" },
+      { strong: "Steel + wood", rest: "hybrid build" },
     ],
     // image: "/images/hero.jpg",
   },
 
   // ── Services ─────────────────────────────────────────────────────────
   services: {
-    eyebrow: "What we do",
-    headline: "From the ground up, or down to the studs.",
+    eyebrow: "What we build",
+    headline: "From shell to turn-key, built better.",
     items: [
       {
         title: "Turnkey Barndominiums",
-        desc: "Full custom builds managed foundation to final finish, within ~60 miles of Red Oak.",
+        desc: "A move-in-ready barndo handled start to finish — design, build, and final finishes. Turn-key within ~60 miles of Red Oak.",
         // image: "/images/services/turnkey-barndominiums.jpg",
       },
       {
         title: "Shell Barndominiums",
-        desc: "Weather-tight steel shells ready for you to finish out, built within ~100 miles of Red Oak.",
+        desc: "A weather-tight steel-and-wood shell, ready for you to finish your way. Built within ~100 miles of Red Oak.",
         // image: "/images/services/shell-barndominiums.jpg",
       },
       {
-        title: "Custom Homes & Shops",
-        desc: "Conventional custom homes, metal shops, and expert masonry, held to the same standard.",
-        // image: "/images/services/custom-homes-shops.jpg",
+        title: "Custom Homes",
+        desc: "Traditional custom homes held to the same standard — efficient, durable, and tailored to how you live.",
+        // image: "/images/services/custom-homes.jpg",
+      },
+      {
+        title: "Metal Shops",
+        desc: "Workshops, barns, and storage built tough for Texas — practical steel buildings done right.",
+        // image: "/images/services/metal-shops.jpg",
+      },
+      {
+        title: "Masonry",
+        desc: "Expert stone and brickwork that adds lasting character and curb appeal to any build.",
+        // image: "/images/services/masonry.jpg",
       },
     ],
   },
@@ -590,6 +612,13 @@ export const client: Client = {
     ],
   },
 
+  // ── Service-area callout (homepage band + /quote) ────────────────────
+  serviceArea: {
+    turnkey: "Turnkey within ~60 miles of Red Oak",
+    shell: "Shell within ~100 miles",
+    area: "Serving DFW, North & Central Texas",
+  },
+
   // ── Reviews ──────────────────────────────────────────────────────────
   // NOTE: real Google reviews — VERIFY exact wording, get the reviewers'
   // permission, and refresh these before launch.
@@ -610,22 +639,23 @@ export const client: Client = {
         detail: "Google Review",
       },
     ],
-    markers: ["20+ Yrs Experience", "NewHomeSource Award Winner", "Insured", "DFW & North Texas"],
+    // Value pillars (no unverifiable awards/figures — keep it integrity-first).
+    markers: ["Built for Texas weather", "Energy efficient", "Low maintenance", "Every build on YouTube"],
   },
 
   // ── About ────────────────────────────────────────────────────────────
   about: {
     eyebrow: "Who we are",
-    headline: "Family-owned, building Texas barndominiums since 2015.",
+    headline: "Family-run, and proud of every build.",
     paragraphs: [
-      "We're Josh and Brandy Helm. We've been in construction since 2006, and in 2015 we built our own barndominium — and fell in love with it. Today we're one of the most-followed barndominium builders in Texas.",
-      "We build with integrity, real energy efficiency, and total transparency — we even document our builds start to finish on YouTube. From shell to turn-key, every barndo carries our name.",
+      "We're Josh and Brandy Helm. We've been building across the DFW area since 2006, and in 2015 we built our own barndominium — fell in love with it, and made barndos our focus ever since.",
+      "Our hybrid method pairs steel strength with proven wood framing, so your home stands up to Texas weather, runs efficient, and needs less upkeep. And because we film every build and share the journey on YouTube, you get to watch it come together — fewer surprises, more collaboration, and a home that's never a template. Just yours.",
     ],
     stats: [
       { num: "2006", label: "Building since" },
+      { num: "2015", label: "Barndo specialists since" },
       { num: "100 mi", label: "Build radius" },
-      { num: "88K+", label: "Followers" },
-      { num: "Award", label: "NewHomeSource winner" },
+      { num: "Family", label: "Owned & operated" },
     ],
     // image: "/images/owner.jpg",
   },
@@ -633,10 +663,10 @@ export const client: Client = {
   // ── CTA band ─────────────────────────────────────────────────────────
   cta: {
     eyebrow: "Ready when you are",
-    headline: "Let's build your barndominium.",
+    headline: "Let's build yours.",
     supporting:
-      "Free, no-pressure quotes across North & Central Texas — from shell to turn-key.",
-    primaryCta: "Get a Free Quote →",
+      "Free, no-pressure quotes across the DFW area and North & Central Texas — shell to turn-key, steel done right.",
+    primaryCta: "Get a Quote →",
   },
 
   // ── Contact ──────────────────────────────────────────────────────────
@@ -663,13 +693,19 @@ export const client: Client = {
   // ── Footer ───────────────────────────────────────────────────────────
   footer: {
     tagline:
-      "Family-owned barndominiums, custom homes, and metal shops — built across North & Central Texas since 2006.",
+      "Family-owned steel barndominiums and custom homes, built better across the DFW area since 2006.",
     quickLinks: [
       { label: "Services", href: "#services" },
       { label: "Projects", href: "#projects" },
       { label: "About", href: "#about" },
       { label: "Reviews", href: "#reviews" },
-      { label: "Contact", href: "#contact" },
+      { label: "Get a Quote", href: "/quote" },
+    ],
+    // "For clients" group — moved out of the top nav so prime nav stays focused
+    // on new visitors. PLACEHOLDER — confirm the exact Client Portal URL.
+    clientLinks: [
+      { label: "Client Portal", href: "https://buildertrend.net/", external: true },
+      { label: "Barndo Gear", href: "https://bestbarndoplans.com/collections/barndo-gear", external: true },
     ],
     towns: [
       "Red Oak",

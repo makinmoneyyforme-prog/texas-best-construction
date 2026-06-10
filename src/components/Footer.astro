@@ -12,13 +12,29 @@ const contact = [
     <div class="lg:pr-8">
       <a href="/" class="font-display font-extrabold text-2xl tracking-tight text-white uppercase">{client.name}<span class="text-white">.</span></a>
       <p class="text-white/70 leading-relaxed mt-4 max-w-[32ch]">{f.tagline}</p>
+
+      <div class="mt-7">
+        <h3 class="font-display font-bold text-xs uppercase tracking-widest text-white/50 mb-3">For clients</h3>
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+          {f.clientLinks.map((l) => (
+            <li>
+              <a
+                href={l.href}
+                target={l.external ? '_blank' : undefined}
+                rel={l.external ? 'noopener noreferrer' : undefined}
+                class="inline-flex items-center gap-1 text-white/70 hover:text-white transition link-underline"
+              >{l.label}{l.external && <span class="text-white/40 text-xs" aria-hidden="true">↗</span>}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
 
     <div>
       <h3 class="font-display font-bold text-sm uppercase tracking-widest text-white mb-5">Quick links</h3>
       <ul class="space-y-3">
         {f.quickLinks.map((l) => (
-          <li><a href={l.href} class="text-white/70 hover:text-white transition">{l.label}</a></li>
+          <li><a href={l.href} class="text-white/70 hover:text-white transition link-underline">{l.label}</a></li>
         ))}
       </ul>
     </div>
@@ -34,7 +50,7 @@ const contact = [
       <h3 class="font-display font-bold text-sm uppercase tracking-widest text-white mb-5">Contact</h3>
       <ul class="space-y-3">
         {contact.map((c) => (
-          <li><a href={c.href} class="text-white/70 hover:text-white transition">{c.label}</a></li>
+          <li><a href={c.href} class="text-white/70 hover:text-white transition link-underline">{c.label}</a></li>
         ))}
       </ul>
     </div>
@@ -44,7 +60,7 @@ const contact = [
     <p class="text-white/60 text-sm">{f.licenseNumber ? `Licensed & Insured · License #${f.licenseNumber}` : "Insured"}</p>
     <div class="flex items-center gap-6 text-sm font-display font-bold uppercase tracking-wide">
       {f.socials.map((s) => (
-        <a href={s.href} class="text-white/70 hover:text-white transition">{s.label}</a>
+        <a href={s.href} class="text-white/70 hover:text-white transition link-underline">{s.label}</a>
       ))}
     </div>
     <p class="text-white/60 text-sm">© {f.copyrightYear} {client.legalName}. All rights reserved.</p>

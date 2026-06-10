@@ -23,7 +23,7 @@ const fmt = (d: Date) =>
     <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal-group>
       {posts.map((post) => (
         <a href={`/buzz/${post.id}`} class="group block">
-          <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-4">
+          <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-4" data-reveal-img>
             {post.data.image
               ? <img src={post.data.image} alt={post.data.title} class="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
               : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic transition-transform duration-500 group-hover:scale-105">post image</div>}
