@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { client } from '../data/client';
+const faq = client.faq;
+---
+<BaseLayout title="FAQ · Texas Best Construction">
+  <section class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+    <div class="max-w-3xl" data-reveal>
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Answers</p>
+      <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05]">Frequently Asked Questions</h1>
+      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">The questions we hear most about building a barndominium with Texas Best.</p>
+    </div>
+
+    <!-- Accordion -->
+    <div class="mt-16 max-w-3xl border-t border-ink/10" data-reveal-group>
+      {faq.map((item, i) => (
+        <div class="border-b border-ink/10">
+          <h2>
+            <button
+              type="button"
+              id={`faq-trigger-${i}`}
+              aria-expanded="false"
+              aria-controls={`faq-panel-${i}`}
+              class="faq-trigger group w-full flex items-start justify-between gap-6 text-left py-6 cursor-pointer"
+            >
+              <span class="font-display font-extrabold text-lg md:text-xl leading-snug">{item.question}</span>
+              <svg class="faq-icon shrink-0 w-5 h-5 mt-1 text-ink-soft transition-transform duration-300 group-hover:text-ink" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 7.5 10 13l6-5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </h2>
+          <div
+            id={`faq-panel-${i}`}
+            role="region"
+            aria-labelledby={`faq-trigger-${i}`}
+            class="faq-panel grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out"
+          >
+            <div class="overflow-hidden">
+              <p class="text-ink-soft text-lg leading-relaxed pb-7 max-w-2xl">{item.answer}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Still-have-questions nudge -->
+    <div class="mt-16 max-w-3xl flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6" data-reveal>
+      <p class="text-ink-soft">Still have a question? We're happy to talk it through.</p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/quote" class="font-display font-bold text-sm bg-ink hover:bg-accent-deep text-white px-5 py-3 rounded-sm transition">Get a Quote</a>
+        <a href="tel:4695528205" class="font-display font-bold text-sm border border-ink/20 hover:border-ink text-ink px-5 py-3 rounded-sm transition">Call {client.phone}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const triggers = document.querySelectorAll('.faq-trigger');
+  triggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const panel = document.getElementById(trigger.getAttribute('aria-controls') || '');
+      const icon = trigger.querySelector('.faq-icon');
+      const open = trigger.getAttribute('aria-expanded') === 'true';
+
+      trigger.setAttribute('aria-expanded', String(!open));
+      if (panel) {
+        panel.classList.toggle('grid-rows-[0fr]', open);
+        panel.classList.toggle('grid-rows-[1fr]', !open);
+      }
+      if (icon) icon.classList.toggle('rotate-180', !open);
+    });
+  });
+</script>

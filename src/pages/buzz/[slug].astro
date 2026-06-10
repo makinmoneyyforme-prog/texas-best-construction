@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Accepts watch?v= / youtu.be / embed URLs and returns an embeddable one.
+function embedUrl(url: string) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : url;
+}
+---
+<BaseLayout title={`${post.data.title} · Barndo Buzz`}>
+  <article class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+    <div class="max-w-3xl mx-auto">
+      <div data-reveal>
+        <a href="/buzz" class="inline-flex items-center gap-1.5 font-display font-bold text-sm text-ink-soft hover:text-ink transition"><span aria-hidden="true">←</span> Back to Barndo Buzz</a>
+        <p class="font-display font-bold text-xs uppercase tracking-wide text-ink-soft mt-10">{fmt(post.data.date)}</p>
+        <h1 class="text-3xl md:text-5xl font-display font-extrabold tracking-tight leading-[1.08] mt-3">{post.data.title}</h1>
+        <p class="text-lg md:text-xl text-ink-soft leading-relaxed mt-5">{post.data.excerpt}</p>
+      </div>
+
+      <div class="aspect-[16/9] bg-stone rounded-sm overflow-hidden mt-10" data-reveal>
+        {post.data.image
+          ? <img src={post.data.image} alt={post.data.title} class="w-full h-full object-cover grayscale" />
+          : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic">post image</div>}
+      </div>
+
+      {post.data.youtube && (
+        <div class="aspect-video rounded-sm overflow-hidden bg-dark mt-6" data-reveal>
+          <iframe
+            class="w-full h-full"
+            src={embedUrl(post.data.youtube)}
+            title={`${post.data.title} — video`}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      )}
+
+      <div class="post-body mt-12 max-w-2xl" data-reveal>
+        <Content />
+      </div>
+
+      <div class="mt-16 pt-8 border-t border-ink/10" data-reveal>
+        <a href="/buzz" class="inline-flex items-center gap-1.5 font-display font-bold text-sm text-ink hover:gap-2.5 transition-all"><span aria-hidden="true">←</span> Back to Barndo Buzz</a>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

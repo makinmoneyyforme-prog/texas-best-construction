@@ -1,0 +1,228 @@
+---
+// CostCalculator.astro — live B&W barndominium cost estimator for /quote.
+// All rates come from client.calculator; no numbers are hardcoded here. The CTA
+// scrolls to #quote-form on the same page and passes the estimate into the form.
+import { client } from '../data/client';
+const calc = client.calculator;
+const segBtn = 'flex-1 font-display font-bold text-sm px-4 py-2.5 rounded-sm transition text-center';
+---
+<section class="bg-dark text-white px-8 md:px-12 py-24 md:py-28">
+  <div class="max-w-2xl mb-14" data-reveal>
+    <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-white mb-4"><span class="w-8 h-px bg-white"></span>{calc.eyebrow}</p>
+    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{calc.headline}</h2>
+  </div>
+
+  <div id="calc" class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start" data-config={JSON.stringify(calc)} data-reveal-group>
+    <!-- Controls -->
+    <div class="lg:col-span-3 space-y-10">
+      <!-- Build type -->
+      <div>
+        <label class="block font-display font-bold text-sm uppercase tracking-wide text-white mb-3">Build type</label>
+        <div id="calc-buildtypes" class="flex gap-2 p-1 bg-white/5 border border-white/10 rounded-sm" role="group" aria-label="Build type">
+          {calc.buildTypes.map((b, i) => (
+            <button
+              type="button"
+              data-buildtype={b.id}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              class:list={[segBtn, i === 0 ? 'bg-white text-ink' : 'text-white/60 hover:text-white']}
+            >{b.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Square footage -->
+      <div>
+        <div class="flex items-baseline justify-between mb-3">
+          <label for="calc-sqft" class="font-display font-bold text-sm uppercase tracking-wide text-white">Square footage</label>
+          <span class="font-display font-extrabold text-2xl"><span id="calc-sqft-val">{calc.sqft.default.toLocaleString()}</span> <span class="text-white/50 text-base font-bold">sq ft</span></span>
+        </div>
+        <input
+          id="calc-sqft"
+          type="range"
+          class="calc-range w-full"
+          min={calc.sqft.min}
+          max={calc.sqft.max}
+          step={calc.sqft.step}
+          value={calc.sqft.default}
+          aria-label="Square footage"
+        />
+        <div class="flex justify-between text-white/40 text-xs font-display font-bold mt-2">
+          <span>{calc.sqft.min.toLocaleString()}</span>
+          <span>{calc.sqft.max.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <!-- Finish level (Turnkey only) -->
+      <div id="calc-finish-wrap" class="hidden">
+        <label class="block font-display font-bold text-sm uppercase tracking-wide text-white mb-3">Finish level</label>
+        <div id="calc-finishlevels" class="flex gap-2 p-1 bg-white/5 border border-white/10 rounded-sm" role="group" aria-label="Finish level">
+          {calc.finishLevels.map((f, i) => (
+            <button
+              type="button"
+              data-finish={f.id}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              class:list={[segBtn, i === 0 ? 'bg-white text-ink' : 'text-white/60 hover:text-white']}
+            >{f.label}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Live estimate -->
+    <div class="lg:col-span-2">
+      <div class="bg-white/5 border border-white/10 rounded-sm p-8">
+        <p class="font-display font-bold text-sm uppercase tracking-wide text-white/50 mb-3">Estimated cost</p>
+        <p id="calc-range" class="font-display font-extrabold text-3xl md:text-4xl leading-tight tracking-tight">—</p>
+        <p id="calc-persqft" class="text-white/50 text-sm mt-2">—</p>
+        <a
+          id="calc-cta"
+          href="#quote-form"
+          class="mt-7 block w-full font-display font-bold text-sm bg-white hover:bg-stone text-ink px-5 py-3.5 rounded-sm transition text-center"
+        >{calc.cta}</a>
+        <p class="text-white/40 text-xs leading-relaxed mt-5">{calc.disclaimer}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .calc-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+  .calc-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .calc-range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .calc-range:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 6px;
+  }
+</style>
+
+<script>
+  const root = document.getElementById('calc');
+  if (root) {
+    const cfg = JSON.parse(root.dataset.config);
+    const activeSeg = ['bg-white', 'text-ink'];
+    const idleSeg = ['text-white/60', 'hover:text-white'];
+
+    let buildId = cfg.buildTypes[0].id;
+    let finishId = cfg.finishLevels[0].id;
+    let sqft = cfg.sqft.default;
+
+    const sqftInput = document.getElementById('calc-sqft');
+    const sqftVal = document.getElementById('calc-sqft-val');
+    const finishWrap = document.getElementById('calc-finish-wrap');
+    const rangeEl = document.getElementById('calc-range');
+    const perSqftEl = document.getElementById('calc-persqft');
+    const cta = document.getElementById('calc-cta');
+
+    const fmt = (n) => '$' + Math.round(n).toLocaleString('en-US');
+    const buildType = () => cfg.buildTypes.find((b) => b.id === buildId);
+    const finishLevel = () => cfg.finishLevels.find((f) => f.id === finishId);
+    const roundTo = (n) => Math.round(n / cfg.roundTo) * cfg.roundTo;
+
+    function multiplier() {
+      return buildType().finish ? finishLevel().multiplier : 1;
+    }
+
+    function estimate() {
+      const m = multiplier();
+      return {
+        low: roundTo(sqft * buildType().lowPerSqft * m),
+        high: roundTo(sqft * buildType().highPerSqft * m),
+        perLow: Math.round(buildType().lowPerSqft * m),
+        perHigh: Math.round(buildType().highPerSqft * m),
+      };
+    }
+
+    function setActive(container, attr, value) {
+      container.querySelectorAll('button').forEach((btn) => {
+        const on = btn.dataset[attr] === value;
+        btn.setAttribute('aria-pressed', String(on));
+        btn.classList.remove(...(on ? idleSeg : activeSeg));
+        btn.classList.add(...(on ? activeSeg : idleSeg));
+      });
+    }
+
+    function render() {
+      finishWrap.classList.toggle('hidden', !buildType().finish);
+      sqftVal.textContent = sqft.toLocaleString('en-US');
+      const e = estimate();
+      rangeEl.textContent = `${fmt(e.low)} – ${fmt(e.high)}`;
+      perSqftEl.textContent = `~$${e.perLow}–$${e.perHigh} / sq ft`;
+    }
+
+    document.getElementById('calc-buildtypes').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-buildtype]');
+      if (!btn) return;
+      buildId = btn.dataset.buildtype;
+      setActive(ev.currentTarget, 'buildtype', buildId);
+      render();
+    });
+
+    document.getElementById('calc-finishlevels').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-finish]');
+      if (!btn) return;
+      finishId = btn.dataset.finish;
+      setActive(ev.currentTarget, 'finish', finishId);
+      render();
+    });
+
+    sqftInput.addEventListener('input', () => {
+      sqft = Number(sqftInput.value);
+      render();
+    });
+
+    // CTA: pass the estimate into the quote form, then smooth-scroll to it.
+    cta.addEventListener('click', (ev) => {
+      const target = document.getElementById('quote-form');
+      const e = estimate();
+      const bits = [buildType().label, `${sqft.toLocaleString('en-US')} sq ft`];
+      if (buildType().finish) bits.push(finishLevel().label);
+      bits.push(`~${fmt(e.low)}–${fmt(e.high)}`);
+      const summary = bits.join(' · ');
+
+      const field = document.getElementById('estimate-field');
+      const summaryEl = document.getElementById('estimate-summary');
+      const wrap = document.getElementById('estimate-summary-wrap');
+      if (field) field.value = summary;
+      if (summaryEl) summaryEl.textContent = summary;
+      if (wrap) wrap.classList.remove('hidden');
+
+      // Pre-select the matching project type when present.
+      const select = document.getElementById('q-project');
+      if (select) {
+        const match = Array.from(select.options).find((o) => o.value === buildType().label);
+        if (match) select.value = match.value;
+      }
+
+      if (target) {
+        ev.preventDefault();
+        if (window.lenis) window.lenis.scrollTo(target, { offset: -80 });
+        else target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    render();
+  }
+</script>

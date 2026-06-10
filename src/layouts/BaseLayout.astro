@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 const { title = "Contractor Site Kit" } = Astro.props;
 ---
 <!doctype html>
@@ -11,8 +13,21 @@ const { title = "Contractor Site Kit" } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <!-- Synchronously flag motion-on before paint, so reveal targets hide without
+         a flash. Skipped for reduced-motion / no-JS — they get static content. -->
+    <script is:inline>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('motion');
+      }
+    </script>
   </head>
   <body class="bg-bone text-ink font-body antialiased">
+    <Header />
     <slot />
+    <Footer />
+    <!-- Site-wide motion layer (Lenis smooth scroll + GSAP scroll-reveals). -->
+    <script>
+      import '../scripts/motion.ts';
+    </script>
   </body>
 </html>

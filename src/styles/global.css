@@ -22,3 +22,61 @@
   h1, h2, h3 { font-family: var(--font-display); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
   body { line-height: 1.6; }
 }
+
+/* ── Motion layer ──────────────────────────────────────────────────────
+   Lenis smooth-scroll plumbing (per the library's recommended baseline). */
+html.lenis,
+html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Scroll-reveal initial state. Gated on html.motion (added synchronously in
+   BaseLayout only when JS is on AND reduced motion is off), so no-JS and
+   reduced-motion users always see fully-rendered, visible content. */
+html.motion [data-reveal],
+html.motion [data-reveal-group] > * {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal-group] > * { opacity: 1 !important; }
+}
+
+/* ── Blog prose (Barndo Buzz post body) ────────────────────────────────
+   Hand-rolled B&W typography for rendered markdown — no plugin needed. */
+.post-body { font-size: 1.125rem; color: var(--color-ink); }
+.post-body > * + * { margin-top: 1.25rem; }
+.post-body h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-top: 2.75rem;
+}
+.post-body h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin-top: 2.25rem;
+}
+.post-body p { line-height: 1.75; }
+.post-body a { text-decoration: underline; text-underline-offset: 2px; }
+.post-body a:hover { color: var(--color-accent-deep); }
+.post-body strong { font-weight: 600; }
+.post-body ul, .post-body ol { padding-left: 1.25rem; }
+.post-body ul { list-style: disc; }
+.post-body ol { list-style: decimal; }
+.post-body li { margin-top: 0.5rem; line-height: 1.7; }
+.post-body li::marker { color: var(--color-ink-soft); }
+.post-body blockquote {
+  border-left: 2px solid var(--color-ink);
+  padding-left: 1.25rem;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}

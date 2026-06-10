@@ -1,0 +1,294 @@
+---
+// BarndoViewer.astro — interactive procedural 3D barndominium (homepage).
+// Built entirely from primitives; no external model file. three.js is loaded
+// lazily (dynamic import on scroll-into-view) so it stays out of the initial
+// bundle. The render loop pauses off-screen and the whole thing degrades to a
+// static panel where WebGL is unavailable.
+---
+<section id="barndo-viewer" data-reveal class="bg-dark text-white px-8 md:px-12 py-24 md:py-28">
+  <div class="max-w-2xl mb-14">
+    <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-white mb-4"><span class="w-8 h-px bg-white"></span>Explore the build</p>
+    <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">See it from every angle.</h2>
+    <p class="text-white/70 text-lg mt-4 leading-relaxed">A quick interactive look at the classic barndominium silhouette — long metal body, standing-seam gable roof, covered porch. Drag it around.</p>
+  </div>
+
+  <!-- data-lenis-prevent stops Lenis from stealing the scroll-to-zoom over the canvas. -->
+  <div id="barndo-frame" data-lenis-prevent class="relative rounded-sm border border-white/15 overflow-hidden bg-dark-2">
+    <div class="aspect-[16/11] sm:aspect-[16/9] lg:aspect-[21/9] w-full">
+      <canvas id="barndo-canvas" class="block w-full h-full"></canvas>
+    </div>
+
+    <!-- Interaction hint (hidden once the user grabs it) -->
+    <div id="barndo-hint" class="pointer-events-none absolute bottom-3 left-3 font-display font-bold text-[11px] uppercase tracking-wide text-white/55 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-sm transition-opacity duration-500">
+      Drag to rotate · scroll to zoom
+    </div>
+
+    <!-- Graceful fallback (no WebGL / load failure) -->
+    <div id="barndo-fallback" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center px-6 bg-dark-2">
+      <p class="font-display font-extrabold text-xl text-white/80">3D preview unavailable on this device</p>
+      <p class="text-white/45 text-sm mt-2 max-w-xs">Your browser doesn't support the 3D viewer — everything else works as normal.</p>
+    </div>
+  </div>
+
+  <p class="text-white/40 text-xs mt-4">Representative model — not a specific floor plan or elevation.</p>
+</section>
+
+<script>
+  const section = document.getElementById('barndo-viewer');
+  const canvas = document.getElementById('barndo-canvas') as HTMLCanvasElement | null;
+  const frame = document.getElementById('barndo-frame');
+  const fallback = document.getElementById('barndo-fallback');
+  const hint = document.getElementById('barndo-hint');
+
+  function showFallback() {
+    if (fallback) fallback.classList.remove('hidden');
+    if (canvas) canvas.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+  }
+
+  function webglSupported() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    } catch {
+      return false;
+    }
+  }
+
+  if (section && canvas && frame) {
+    let viewer: { start: () => void; stop: () => void } | null = null;
+    let booting = false;
+    let failed = false;
+    let inView = false;
+
+    async function boot() {
+      if (booting || failed) return;
+      booting = true;
+      try {
+        const THREE = await import('three');
+        const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls.js');
+        viewer = createScene(THREE, OrbitControls);
+        if (inView) viewer.start();
+      } catch (err) {
+        failed = true;
+        showFallback();
+        console.error('[barndo-viewer] failed to load:', err);
+      } finally {
+        booting = false;
+      }
+    }
+
+    // Lazy init + pause/resume based on visibility.
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        inView = entry.isIntersecting;
+        if (inView) {
+          if (failed) return;
+          if (!viewer && !booting) {
+            if (!webglSupported()) {
+              failed = true;
+              showFallback();
+              io.disconnect();
+              return;
+            }
+            boot();
+          } else if (viewer) {
+            viewer.start();
+          }
+        } else if (viewer) {
+          viewer.stop();
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+    io.observe(section);
+
+    function createScene(THREE: any, OrbitControls: any) {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const small = window.matchMedia('(max-width: 768px)').matches;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = !small; // shadows are the costly bit — drop on mobile
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+      camera.position.set(9, 5.2, 11);
+
+      // ── Lighting (cinematic, restrained) ──────────────────────────────
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+      const key = new THREE.DirectionalLight(0xffffff, 2.1);
+      key.position.set(7, 11, 6);
+      key.castShadow = !small;
+      key.shadow.mapSize.set(1024, 1024);
+      key.shadow.camera.near = 1;
+      key.shadow.camera.far = 50;
+      key.shadow.camera.left = -14;
+      key.shadow.camera.right = 14;
+      key.shadow.camera.top = 14;
+      key.shadow.camera.bottom = -14;
+      key.shadow.bias = -0.0004;
+      scene.add(key);
+
+      const rim = new THREE.DirectionalLight(0xffffff, 0.85);
+      rim.position.set(-9, 6, -7);
+      scene.add(rim);
+
+      const fill = new THREE.DirectionalLight(0xffffff, 0.3);
+      fill.position.set(-4, 3, 8);
+      scene.add(fill);
+
+      // ── Monochrome metal materials ────────────────────────────────────
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xe8e8e5, metalness: 0.45, roughness: 0.5 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x141415, metalness: 0.65, roughness: 0.4 });
+      const doorMat = new THREE.MeshStandardMaterial({ color: 0x6b6b6e, metalness: 0.5, roughness: 0.55 });
+      const recessMat = new THREE.MeshStandardMaterial({ color: 0x181819, metalness: 0.4, roughness: 0.55 });
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x0c0c0d, metalness: 0.2, roughness: 0.12 });
+
+      const W = 9, H = 3.2, D = 4.4; // length (x), height (y), depth (z)
+      const building = new THREE.Group();
+
+      // Body
+      const body = new THREE.Mesh(new THREE.BoxGeometry(W, H, D), wallMat);
+      body.position.y = H / 2;
+      body.castShadow = true;
+      body.receiveShadow = true;
+      building.add(body);
+
+      // Pitched gable roof — triangular prism. Built in shape-space then rotated
+      // so the ridge runs along the building's length (x).
+      const roofH = 1.7;
+      const eave = 0.28;
+      const tri = new THREE.Shape();
+      tri.moveTo(-(D / 2 + eave), 0);
+      tri.lineTo(D / 2 + eave, 0);
+      tri.lineTo(0, roofH);
+      tri.closePath();
+      const ridgeLen = W + eave * 2;
+      const roofGeo = new THREE.ExtrudeGeometry(tri, { depth: ridgeLen, bevelEnabled: false });
+      roofGeo.translate(0, 0, -ridgeLen / 2);
+      const roof = new THREE.Mesh(roofGeo, roofMat);
+      roof.rotation.y = Math.PI / 2;
+      roof.position.y = H;
+      roof.castShadow = true;
+      roof.receiveShadow = true;
+      building.add(roof);
+
+      const frontZ = D / 2 + 0.02; // front face plane (+z)
+
+      // Roll-up shop door (large recessed panel, left of front)
+      const shop = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.6, 0.1), recessMat);
+      shop.position.set(-W * 0.26, 1.32, frontZ);
+      building.add(shop);
+
+      // Front (man) door, mid-gray
+      const frontDoor = new THREE.Mesh(new THREE.BoxGeometry(0.95, 2.0, 0.1), doorMat);
+      frontDoor.position.set(W * 0.06, 1.0, frontZ);
+      building.add(frontDoor);
+
+      // Front windows (dark glass), to the right
+      const winGeo = new THREE.BoxGeometry(0.9, 1.0, 0.08);
+      [0.24, 0.4].forEach((fx) => {
+        const win = new THREE.Mesh(winGeo, glassMat);
+        win.position.set(W * fx, 1.75, frontZ);
+        building.add(win);
+      });
+
+      // Side windows on the +x gable end
+      const sideWinGeo = new THREE.BoxGeometry(0.08, 0.95, 0.95);
+      [-0.9, 0.9].forEach((sz) => {
+        const win = new THREE.Mesh(sideWinGeo, glassMat);
+        win.position.set(W / 2 + 0.02, 1.7, sz);
+        building.add(win);
+      });
+
+      // Covered front porch: overhang + slim posts
+      const porchDepth = 1.6;
+      const porchW = W * 0.5;
+      const porchX = W * 0.12;
+      const porch = new THREE.Mesh(new THREE.BoxGeometry(porchW, 0.16, porchDepth), roofMat);
+      porch.position.set(porchX, H * 0.84, D / 2 + porchDepth / 2);
+      porch.castShadow = true;
+      building.add(porch);
+
+      const postH = H * 0.84;
+      const postGeo = new THREE.BoxGeometry(0.14, postH, 0.14);
+      [porchX - porchW / 2 + 0.15, porchX + porchW / 2 - 0.15].forEach((px) => {
+        const post = new THREE.Mesh(postGeo, roofMat);
+        post.position.set(px, postH / 2, D / 2 + porchDepth - 0.12);
+        post.castShadow = true;
+        building.add(post);
+      });
+
+      scene.add(building);
+
+      // Subtle ground plane — shows only the soft contact shadow (transparent bg).
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(80, 80),
+        new THREE.ShadowMaterial({ opacity: 0.28 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      // ── Controls ──────────────────────────────────────────────────────
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enablePan = false;
+      controls.minDistance = 8;
+      controls.maxDistance = 24;
+      controls.minPolarAngle = 0.15; // can't flip over the top
+      controls.maxPolarAngle = Math.PI / 2 - 0.04; // can't dip below ground
+      controls.target.set(0, 1.2, 0);
+      controls.autoRotate = !reduced;
+      controls.autoRotateSpeed = 0.55;
+      controls.update();
+
+      controls.addEventListener('start', () => {
+        controls.autoRotate = false;
+        if (hint) hint.style.opacity = '0';
+      });
+
+      // ── Sizing ────────────────────────────────────────────────────────
+      function resize() {
+        const w = canvas!.clientWidth;
+        const h = canvas!.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      const ro = new ResizeObserver(resize);
+      ro.observe(frame!);
+      resize();
+
+      // ── Render loop (pausable) ────────────────────────────────────────
+      let rafId: number | null = null;
+      function tick() {
+        controls.update();
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(tick);
+      }
+      return {
+        start() {
+          if (rafId == null) {
+            resize();
+            rafId = requestAnimationFrame(tick);
+          }
+        },
+        stop() {
+          if (rafId != null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+        },
+      };
+    }
+  }
+</script>

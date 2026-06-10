@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { client } from '../data/client';
+
+const projects = client.projects;
+const filters = ['All', 'Turnkey', 'Shell', 'Custom Home', 'Shop'] as const;
+---
+<BaseLayout title="Our Builds · Texas Best Construction">
+  <section class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
+    <!-- Page header -->
+    <div class="max-w-3xl" data-reveal>
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Our work</p>
+      <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05]">Our Builds</h1>
+      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">Barndominiums, custom homes, and metal shops built across North &amp; Central Texas — shell to turn-key. Proof, not promises.</p>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="mt-12 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between border-b border-ink/10 pb-6" data-reveal>
+      <div class="flex flex-wrap gap-2.5" role="group" aria-label="Filter builds by type">
+        {filters.map((f, i) => (
+          <button
+            type="button"
+            data-filter={f}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            class:list={[
+              'font-display font-bold text-sm px-4 py-2 rounded-sm border transition',
+              i === 0
+                ? 'bg-ink text-white border-ink'
+                : 'bg-transparent text-ink border-ink/15 hover:border-ink',
+            ]}
+          >{f}</button>
+        ))}
+      </div>
+      <p class="font-display font-bold text-sm text-ink-soft whitespace-nowrap" aria-live="polite">
+        <span id="result-count">{projects.length}</span> builds
+      </p>
+    </div>
+
+    <!-- Grid -->
+    <div id="project-grid" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal>
+      {projects.map((p) => (
+        <button
+          type="button"
+          data-project-card
+          data-slug={p.slug}
+          data-type={p.type}
+          class="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-4 focus-visible:ring-offset-bone rounded-sm"
+        >
+          <div class="aspect-[4/3] bg-stone rounded-sm overflow-hidden mb-4 relative">
+            {p.image
+              ? <img src={p.image} alt={p.name} class="w-full h-full object-cover grayscale transition-transform duration-500 group-hover:scale-105" />
+              : <div class="w-full h-full flex items-center justify-center text-ink-soft text-sm italic transition-transform duration-500 group-hover:scale-105">project photo</div>}
+            <span class="absolute top-3 left-3 font-display font-bold text-[11px] uppercase tracking-wide bg-ink text-white px-2.5 py-1 rounded-sm">{p.type}</span>
+          </div>
+          <h3 class="text-xl font-display font-extrabold group-hover:underline underline-offset-4 decoration-1 transition">{p.name}</h3>
+          <p class="text-ink-soft mt-1 flex items-center gap-2 text-sm">
+            <span>{p.location}</span>
+            {p.sqft && <><span class="w-1 h-1 rounded-full bg-ink-soft/50"></span><span>{p.sqft.toLocaleString()} sq ft</span></>}
+          </p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Empty state -->
+    <p id="empty-state" class="hidden mt-16 text-center text-ink-soft italic">No builds in this category yet — more coming soon.</p>
+  </section>
+
+  <!-- Detail modal -->
+  <div id="project-modal" class="fixed inset-0 z-[80] hidden" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+    <div id="modal-backdrop" class="absolute inset-0 bg-black/80 opacity-0 transition-opacity duration-300"></div>
+    <div class="absolute inset-0 overflow-y-auto p-4 sm:p-8 flex items-start sm:items-center justify-center">
+      <div id="modal-panel" class="relative w-full max-w-3xl bg-bone text-ink rounded-sm shadow-2xl shadow-black/50 opacity-0 translate-y-3 transition-all duration-300 my-auto">
+        <button id="modal-close" type="button" aria-label="Close" class="absolute top-3 right-3 z-10 flex items-center justify-center w-10 h-10 rounded-sm bg-bone/90 text-ink/70 hover:text-ink hover:bg-stone transition">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+
+        <div id="modal-image" class="aspect-[16/9] bg-stone rounded-t-sm overflow-hidden"></div>
+        <div id="modal-gallery" class="hidden px-6 md:px-8 pt-4 -mb-2 flex gap-3 overflow-x-auto"></div>
+
+        <div class="p-6 md:p-8">
+          <span id="modal-type" class="font-display font-bold text-[11px] uppercase tracking-widest text-white bg-ink px-2.5 py-1 rounded-sm"></span>
+          <h2 id="modal-name" class="text-3xl md:text-4xl font-display font-extrabold tracking-tight mt-4"></h2>
+          <p id="modal-location" class="text-ink-soft mt-1"></p>
+
+          <dl id="modal-specs" class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-px bg-ink/10 rounded-sm overflow-hidden border border-ink/10"></dl>
+
+          <p id="modal-blurb" class="mt-6 text-ink-soft leading-relaxed max-w-2xl"></p>
+
+          <div id="modal-tour" class="hidden mt-8">
+            <p class="font-display font-bold text-sm uppercase tracking-widest text-ink mb-4 flex items-center gap-3"><span class="w-8 h-px bg-ink"></span>Video tour</p>
+            <div class="aspect-video rounded-sm overflow-hidden bg-dark" id="modal-tour-frame"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ projects }}>
+  // ── Filtering ────────────────────────────────────────────────────────
+  const filterBtns = document.querySelectorAll('[data-filter]');
+  const cards = Array.from(document.querySelectorAll('[data-project-card]'));
+  const countEl = document.getElementById('result-count');
+  const emptyEl = document.getElementById('empty-state');
+  const activeClasses = ['bg-ink', 'text-white', 'border-ink'];
+  const idleClasses = ['bg-transparent', 'text-ink', 'border-ink/15', 'hover:border-ink'];
+
+  function applyFilter(value) {
+    let shown = 0;
+    cards.forEach((card) => {
+      const match = value === 'All' || card.dataset.type === value;
+      card.classList.toggle('hidden', !match);
+      if (match) shown++;
+    });
+    if (countEl) countEl.textContent = String(shown);
+    if (emptyEl) emptyEl.classList.toggle('hidden', shown !== 0);
+  }
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach((b) => {
+        const on = b === btn;
+        b.setAttribute('aria-pressed', String(on));
+        b.classList.remove(...(on ? idleClasses : activeClasses));
+        b.classList.add(...(on ? activeClasses : idleClasses));
+      });
+      applyFilter(btn.dataset.filter);
+    });
+  });
+
+  // ── Detail modal ─────────────────────────────────────────────────────
+  const bySlug = Object.fromEntries(projects.map((p) => [p.slug, p]));
+  const modal = document.getElementById('project-modal');
+  const backdrop = document.getElementById('modal-backdrop');
+  const panel = document.getElementById('modal-panel');
+  const closeBtn = document.getElementById('modal-close');
+  let lastFocused = null;
+  let isOpen = false;
+
+  const photoSlot = 'w-full h-full flex items-center justify-center text-ink-soft text-sm italic';
+
+  function imageMarkup(src, alt) {
+    return src
+      ? `<img src="${src}" alt="${alt}" class="w-full h-full object-cover grayscale" />`
+      : `<div class="${photoSlot}">project photo</div>`;
+  }
+
+  function embedUrl(url) {
+    // Accepts watch?v=, youtu.be/, or an /embed/ URL and returns an embed URL.
+    const m = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}` : url;
+  }
+
+  function populate(p) {
+    document.getElementById('modal-image').innerHTML = imageMarkup(p.image, p.name);
+
+    const galleryEl = document.getElementById('modal-gallery');
+    if (p.gallery && p.gallery.length) {
+      galleryEl.innerHTML = p.gallery
+        .map((g) => `<div class="shrink-0 w-32 aspect-[4/3] bg-stone rounded-sm overflow-hidden">${imageMarkup(g, p.name)}</div>`)
+        .join('');
+      galleryEl.classList.remove('hidden');
+    } else {
+      galleryEl.classList.add('hidden');
+      galleryEl.innerHTML = '';
+    }
+
+    document.getElementById('modal-type').textContent = p.type;
+    document.getElementById('modal-name').textContent = p.name;
+    document.getElementById('modal-location').textContent = p.location;
+
+    const specs = [
+      p.sqft ? { label: 'Size', value: `${p.sqft.toLocaleString()} sq ft` } : null,
+      p.beds ? { label: 'Beds', value: String(p.beds) } : null,
+      p.baths ? { label: 'Baths', value: String(p.baths) } : null,
+      p.year ? { label: 'Year', value: String(p.year) } : null,
+    ].filter(Boolean);
+    const specsEl = document.getElementById('modal-specs');
+    specsEl.innerHTML = specs
+      .map((s) => `<div class="bg-bone p-4"><dt class="font-display font-bold text-xs uppercase tracking-wide text-ink-soft">${s.label}</dt><dd class="font-display font-extrabold text-lg mt-1">${s.value}</dd></div>`)
+      .join('');
+    specsEl.classList.toggle('hidden', specs.length === 0);
+
+    const blurbEl = document.getElementById('modal-blurb');
+    blurbEl.textContent = p.blurb || '';
+    blurbEl.classList.toggle('hidden', !p.blurb);
+
+    const tourEl = document.getElementById('modal-tour');
+    const frameEl = document.getElementById('modal-tour-frame');
+    if (p.youtube) {
+      frameEl.innerHTML = `<iframe class="w-full h-full" src="${embedUrl(p.youtube)}" title="${p.name} video tour" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      tourEl.classList.remove('hidden');
+    } else {
+      frameEl.innerHTML = '';
+      tourEl.classList.add('hidden');
+    }
+  }
+
+  function open(slug) {
+    const p = bySlug[slug];
+    if (!p) return;
+    populate(p);
+    lastFocused = document.activeElement;
+    isOpen = true;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    window.lenis?.stop();
+    requestAnimationFrame(() => {
+      backdrop.classList.replace('opacity-0', 'opacity-100');
+      panel.classList.remove('opacity-0', 'translate-y-3');
+    });
+    closeBtn.focus();
+  }
+
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    backdrop.classList.replace('opacity-100', 'opacity-0');
+    panel.classList.add('opacity-0', 'translate-y-3');
+    document.body.style.overflow = '';
+    window.lenis?.start();
+    window.setTimeout(() => {
+      if (!isOpen) {
+        modal.classList.add('hidden');
+        document.getElementById('modal-tour-frame').innerHTML = ''; // stop playback
+      }
+    }, 300);
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  cards.forEach((card) => card.addEventListener('click', () => open(card.dataset.slug)));
+  closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) close();
+  });
+
+  // Simple focus trap: keep Tab within the modal while open.
+  modal.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !isOpen) return;
+    const focusable = modal.querySelectorAll('a[href], button, iframe, [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+</script>

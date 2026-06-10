@@ -12,12 +12,12 @@ const details = [
 const inputClass = "w-full bg-bone border border-ink/15 rounded-sm px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition";
 ---
 <section id="contact" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
-  <div class="max-w-2xl mb-14">
+  <div class="max-w-2xl mb-14" data-reveal>
     <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{c.eyebrow}</p>
     <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
   </div>
 
-  <div class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start">
+  <div class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start" data-reveal-group>
     <!-- Set action to your Web3Forms/FormSubmit endpoint and add the access-key hidden input later. -->
     <form action="" method="POST" class="lg:col-span-3 grid sm:grid-cols-2 gap-5">
       <div class="sm:col-span-1">

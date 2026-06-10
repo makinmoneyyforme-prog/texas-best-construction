@@ -1,0 +1,199 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CostCalculator from '../components/CostCalculator.astro';
+import { client } from '../data/client';
+
+const c = client.contact;
+const inputClass =
+  "w-full bg-bone border border-ink/15 rounded-sm px-4 py-3 text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition";
+const details = [
+  { label: "Call us", value: client.phone, href: "tel:4695528205" },
+  { label: "Email", value: client.email, href: `mailto:${client.email}` },
+  { label: "Service area", value: c.serviceArea },
+  { label: "Hours", value: c.hours },
+];
+---
+<BaseLayout title="Get a Quote · Texas Best Construction">
+  <!-- Page header -->
+  <section class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28 pb-12 md:pb-16">
+    <div class="max-w-3xl" data-reveal>
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Free, no-pressure</p>
+      <h1 class="text-4xl md:text-6xl font-display font-extrabold tracking-tight leading-[1.05]">Get a Quote</h1>
+      <p class="mt-6 text-lg md:text-xl text-ink-soft leading-relaxed max-w-2xl">Get a ballpark estimate in seconds with the calculator below, then send it over for an exact, no-pressure quote across North &amp; Central Texas.</p>
+    </div>
+  </section>
+
+  <!-- Part 1: cost calculator -->
+  <CostCalculator />
+
+  <!-- Part 2: quote request form -->
+  <section id="quote-form" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28 scroll-mt-24">
+    <div class="max-w-2xl mb-14" data-reveal>
+      <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{c.eyebrow}</p>
+      <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{c.headline}</h2>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start">
+      <div class="lg:col-span-3">
+        <!-- Estimate pass-through summary (revealed when the calculator CTA is used) -->
+        <div id="estimate-summary-wrap" class="hidden mb-8 bg-white border border-ink/15 rounded-sm px-5 py-4">
+          <p class="font-display font-bold text-xs uppercase tracking-wide text-ink-soft">Your estimate</p>
+          <p id="estimate-summary" class="font-display font-extrabold text-lg mt-1"></p>
+        </div>
+
+        <!-- Progressive enhancement: posts directly to Web3Forms if JS is off. -->
+        <form
+          id="quote-request-form"
+          action="https://api.web3forms.com/submit"
+          method="POST"
+          novalidate
+          class="grid sm:grid-cols-2 gap-5"
+        >
+          <input type="hidden" name="access_key" value={c.web3formsAccessKey} />
+          <input type="hidden" name="subject" value="New quote request — Texas Best Construction" />
+          <input type="hidden" name="from_name" value="Texas Best Construction website" />
+          <input type="hidden" name="estimate" id="estimate-field" />
+          <!-- Honeypot — bots fill this; humans never see it. -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" />
+
+          <div class="sm:col-span-1">
+            <label for="q-name" class="block font-display font-bold text-sm mb-2">Name</label>
+            <input id="q-name" name="name" type="text" required placeholder="Your name" class={inputClass} />
+            <p data-error-for="name" class="hidden mt-1.5 text-xs font-display font-bold text-ink">Please enter your name.</p>
+          </div>
+          <div class="sm:col-span-1">
+            <label for="q-phone" class="block font-display font-bold text-sm mb-2">Phone</label>
+            <input id="q-phone" name="phone" type="tel" placeholder="(469) 555-0000" class={inputClass} />
+            <p data-error-for="phone" class="hidden mt-1.5 text-xs font-display font-bold text-ink">Please enter a valid phone number.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="q-email" class="block font-display font-bold text-sm mb-2">Email</label>
+            <input id="q-email" name="email" type="email" required placeholder="you@email.com" class={inputClass} />
+            <p data-error-for="email" class="hidden mt-1.5 text-xs font-display font-bold text-ink">Please enter a valid email address.</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="q-project" class="block font-display font-bold text-sm mb-2">Project type</label>
+            <select id="q-project" name="project_type" class={inputClass}>
+              {c.quoteProjectTypes.map((t) => <option value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="q-message" class="block font-display font-bold text-sm mb-2">Project details</label>
+            <textarea id="q-message" name="message" rows="5" placeholder="Tell us what you're planning, your timeline, and your location." class={inputClass}></textarea>
+          </div>
+
+          <div class="sm:col-span-2">
+            <p id="quote-error" class="hidden mb-4 text-sm font-display font-bold text-ink border border-ink/30 rounded-sm px-4 py-3 bg-stone"></p>
+            <button id="quote-submit" type="submit" class="font-display font-bold text-sm bg-ink hover:bg-accent-deep text-white px-6 py-3.5 rounded-sm transition disabled:opacity-60 disabled:cursor-not-allowed">{c.submitCta}</button>
+          </div>
+        </form>
+
+        <!-- Success confirmation (revealed on a successful send) -->
+        <div id="quote-success" class="hidden">
+          <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>Request received</p>
+          <h3 class="text-3xl md:text-4xl font-display font-extrabold tracking-tight leading-tight">Thanks — we'll be in touch within one business day.</h3>
+          <p class="mt-4 text-ink-soft leading-relaxed max-w-xl">In the meantime, feel free to call us at <a href="tel:4695528205" class="font-bold text-ink hover:underline underline-offset-2">{client.phone}</a> with anything urgent.</p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2 lg:pl-4">
+        <div class="bg-white rounded-sm border border-ink/10 divide-y divide-ink/10">
+          {details.map((d) => (
+            <div class="p-6">
+              <div class="font-display font-bold text-sm uppercase tracking-wide text-ink mb-1.5">{d.label}</div>
+              {d.href
+                ? <a href={d.href} class="text-xl font-display font-extrabold hover:underline underline-offset-2 transition">{d.value}</a>
+                : <div class="text-ink/90 leading-relaxed">{d.value}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ phone: client.phone, email: client.email }}>
+  const form = document.getElementById('quote-request-form');
+  if (form) {
+    const submitBtn = document.getElementById('quote-submit');
+    const submitLabel = submitBtn.textContent;
+    const errorBox = document.getElementById('quote-error');
+    const successBox = document.getElementById('quote-success');
+
+    const fieldError = (name) => form.querySelector(`[data-error-for="${name}"]`);
+    const markInvalid = (input, on) => {
+      input.classList.toggle('border-ink', on);
+      input.classList.toggle('border-ink/15', !on);
+    };
+
+    function showError(name, on) {
+      const input = form.elements[name];
+      const msg = fieldError(name);
+      if (input) markInvalid(input, on);
+      if (msg) msg.classList.toggle('hidden', !on);
+    }
+
+    function validate() {
+      const name = form.elements['name'];
+      const email = form.elements['email'];
+      const phone = form.elements['phone'];
+      let ok = true;
+
+      const nameBad = !name.value.trim();
+      showError('name', nameBad);
+      if (nameBad) ok = false;
+
+      const emailBad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+      showError('email', emailBad);
+      if (emailBad) ok = false;
+
+      // Phone optional, but if supplied must look like a phone number.
+      const phoneBad = phone.value.trim() !== '' && !/[0-9].*[0-9].*[0-9]/.test(phone.value);
+      showError('phone', phoneBad);
+      if (phoneBad) ok = false;
+
+      return ok;
+    }
+
+    // Clear a field's error as the user corrects it.
+    ['name', 'email', 'phone'].forEach((n) => {
+      const el = form.elements[n];
+      if (el) el.addEventListener('input', () => showError(n, false));
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.classList.add('hidden');
+      if (!validate()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          form.classList.add('hidden');
+          const summaryWrap = document.getElementById('estimate-summary-wrap');
+          if (summaryWrap) summaryWrap.classList.add('hidden');
+          successBox.classList.remove('hidden');
+          if (window.lenis) window.lenis.scrollTo(successBox, { offset: -120 });
+          else successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+        throw new Error(data.message || 'Request failed');
+      } catch (err) {
+        errorBox.innerHTML =
+          `Something went wrong sending your request. Please call <a class="underline underline-offset-2" href="tel:4695528205">${phone}</a> or email <a class="underline underline-offset-2" href="mailto:${email}">${email}</a>.`;
+        errorBox.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = submitLabel;
+      }
+    });
+  }
+</script>

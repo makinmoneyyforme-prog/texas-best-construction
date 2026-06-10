@@ -4,12 +4,12 @@ import { client } from '../data/client';
 const r = client.reviews;
 ---
 <section id="reviews" class="bg-bone text-ink px-8 md:px-12 py-24 md:py-28">
-  <div class="max-w-2xl mb-14">
+  <div class="max-w-2xl mb-14" data-reveal>
     <p class="flex items-center gap-3 font-display font-bold text-sm uppercase tracking-widest text-ink mb-4"><span class="w-8 h-px bg-ink"></span>{r.eyebrow}</p>
     <h2 class="text-4xl md:text-5xl font-display font-extrabold tracking-tight leading-tight">{r.headline}</h2>
   </div>
 
-  <div class="grid md:grid-cols-3 gap-6">
+  <div class="grid md:grid-cols-3 gap-6" data-reveal-group>
     {r.items.map((review) => (
       <figure class="bg-white rounded-sm p-7 border border-ink/10 flex flex-col">
         <div class="text-ink text-lg tracking-widest mb-4">★★★★★</div>
@@ -22,7 +22,7 @@ const r = client.reviews;
     ))}
   </div>
 
-  <div class="flex flex-wrap items-center gap-x-8 gap-y-3 mt-14 pt-8 border-t border-ink/10 font-display font-bold text-sm uppercase tracking-wide text-ink-soft">
+  <div class="flex flex-wrap items-center gap-x-8 gap-y-3 mt-14 pt-8 border-t border-ink/10 font-display font-bold text-sm uppercase tracking-wide text-ink-soft" data-reveal>
     {r.markers.map((m) => <span>{m}</span>)}
   </div>
 </section>
